@@ -1,7 +1,7 @@
 import { Flex } from "@chakra-ui/react";
 
 type Props = {
-  liked: boolean;
+  liked: boolean 
   setLiked: (liked: boolean) => void;
 };
 

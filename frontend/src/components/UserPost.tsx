@@ -1,4 +1,5 @@
 import { Avatar, Box, Flex, Text, Image } from "@chakra-ui/react";
+import { Link } from "react-router-dom";
 import { BsThreeDots } from "react-icons/bs";
 import Actions from "./Actions";
 import { useState } from "react";
@@ -59,18 +60,19 @@ const UserPost = ({ likes, replies, postImg, postTitle }: Props) => {
             <BsThreeDots />
           </Flex>
         </Flex>
-        <Text fontSize={"sm"}>{postTitle}</Text>
-        {postImg && (
-          <Box
-            borderRadius={6}
-            overflow={"hidden"}
-            border={"1px solid "}
-            borderColor={"gray.light"}
-          >
-            <Image src={postImg} w={"full"} />
-          </Box>
-        )}
-
+        <Link to={"/markzuckerberg/post/1"}>
+          <Text fontSize={"sm"}>{postTitle}</Text>
+          {postImg && (
+            <Box
+              borderRadius={6}
+              overflow={"hidden"}
+              border={"1px solid "}
+              borderColor={"gray.light"}
+            >
+              <Image src={postImg} w={"full"} />
+            </Box>
+          )}
+        </Link>
         <Flex gap={3} my={1}>
           <Actions liked={liked} setLiked={setLiked} />
         </Flex>
@@ -80,7 +82,7 @@ const UserPost = ({ likes, replies, postImg, postTitle }: Props) => {
           </Text>
           <Box w={0.5} h={0.5} borderRadius={"full"} bg={"gray.light"}></Box>
           <Text color={"gray.light"} fontSize={"sml"}>
-            {likes} likes
+            {likes + (liked ? 1 : 0)} likes
           </Text>
         </Flex>
       </Flex>

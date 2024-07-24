@@ -1,4 +1,5 @@
 import mongoose, { mongo } from "mongoose";
+console.log('imon usermodel');
 
 const userSchema = mongoose.Schema(
   {
@@ -43,6 +44,7 @@ const userSchema = mongoose.Schema(
   }
 );
 
-const User = mongoose.model('User', userSchema)
+const User = mongoose.model("User", userSchema);
 
-export default User
+
+export default User;

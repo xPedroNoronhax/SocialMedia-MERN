@@ -126,4 +126,30 @@ const replyToPost = async (req, res) => {
   }
 };
 
-export { createPost, getPost, deletePost, likeUnlikePost, replyToPost };
+const getFeedPost = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "Usaer not found" });
+    }
+
+    const following = user.following;
+    const feedPost = await Post.find({ postedBy: { $in: following } }).sort({
+      createdAt: -1,
+    });
+    res.status(200).json({feedPost})
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+    console.log(error);
+  }
+};
+
+export {
+  createPost,
+  getPost,
+  deletePost,
+  likeUnlikePost,
+  replyToPost,
+  getFeedPost,
+};

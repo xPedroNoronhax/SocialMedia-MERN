@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import connectDB from "./db/connectDB.js";
+import cookieParser from "cookie-parser"; // Importe cookie-parser
 import userRoutes from "./routes/userRoutes.js"; // Importe suas rotas
 
 dotenv.config();
@@ -10,6 +11,7 @@ connectDB();
 const app = express();
 
 app.use(express.json()); // Middleware para parsing de JSON
+app.use(cookieParser()); // Use cookie-parser middleware
 
 app.use("/api/users", userRoutes); // Defina a rota base para suas rotas de usuários
 

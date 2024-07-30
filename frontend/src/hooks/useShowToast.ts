@@ -1,6 +1,5 @@
 import { useToast } from "@chakra-ui/react";
 
-
 type ToastStatus =
   | "info"
   | "warning"

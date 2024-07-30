@@ -1,7 +1,7 @@
 import { Button } from "@chakra-ui/react";
 import { useSetRecoilState } from "recoil";
 import userAtom from "../atoms/userAtom";
-import useShowToast from "./hooks/useShowToast";
+import useShowToast from "../hooks/useShowToast";
 
 const LogoutButton = () => {
   const setUser = useSetRecoilState(userAtom);
@@ -23,7 +23,11 @@ const LogoutButton = () => {
       localStorage.removeItem("user-threads");
       setUser(null);
     } catch (error) {
-      console.log(error);
+      if (error instanceof Error) {
+        showToast("Error", error.message, "error");
+      } else {
+        showToast("Error", String(error), "error");
+      }
     }
   };
   return (

@@ -1,6 +1,7 @@
 import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import generateTokenAndSetCookie from "../utils/helpers/generateTokenAndSetCookie.js";
+import { v2 as cloudinary } from "cloudinary";
 
 const getUserProfile = async (req, res) => {
   const { username } = req.params;
@@ -9,7 +10,7 @@ const getUserProfile = async (req, res) => {
     const user = await User.findOne({ username })
       .select("-password")
       .select("-updatedAt");
-    if (!user) return res.status(400).json({ message: "User not found" });
+    if (!user) return res.status(400).json({ error: "User not found" });
 
     res.status(200).json(user);
   } catch (error) {
@@ -26,7 +27,7 @@ const signupUser = async (req, res) => {
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
 
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(400).json({ error: "User already exists" });
     }
 
     // Gerar senha criptografada
@@ -51,10 +52,12 @@ const signupUser = async (req, res) => {
       name: newUser.name,
       email: newUser.email,
       username: newUser.username,
+      bio: newUser.bio,
+      profilePic: newUser.profilePic,
     });
   } catch (error) {
     console.error("Error in signupUser", error.message);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -66,14 +69,14 @@ const loginUser = async (req, res) => {
     const user = await User.findOne({ username });
 
     if (!user) {
-      return res.status(400).json({ message: "Invalid username or password" });
+      return res.status(400).json({ error: "Invalid username or password" });
     }
 
     // Comparar senha
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
     if (!isPasswordCorrect) {
-      return res.status(400).json({ message: "Invalid username or password" });
+      return res.status(400).json({ error: "Invalid username or password" });
     }
 
     // Gerar token e definir cookie
@@ -85,10 +88,12 @@ const loginUser = async (req, res) => {
       name: user.name,
       email: user.email,
       username: user.username,
+      bio: user.bio,
+      profilePic: user.profilePic,
     });
   } catch (error) {
     console.error("Error in loginUser:", error.message);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -98,7 +103,7 @@ const logoutUser = (req, res) => {
     res.status(200).json({ message: "User logged out successfully" });
   } catch (error) {
     console.error("Error in logouUser:", error.message);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -131,12 +136,13 @@ const followUnFollowUser = async (req, res) => {
     }
   } catch (error) {
     console.error("Error in followUnFollowUser:", error.message);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
 const updateUser = async (req, res) => {
-  const { name, email, password, username, profilePic, bio } = req.body;
+  const { name, email, password, username, bio } = req.body;
+  let { profilePic } = req.body;
   const userId = req.user._id;
 
   try {
@@ -154,6 +160,17 @@ const updateUser = async (req, res) => {
       user.password = hashedPassword;
     }
 
+    if (profilePic) {
+      if (user.profilePic) {
+        // Exclua a imagem antiga se houver
+        await cloudinary.uploader.destroy(
+          user.profilePic.split("/").pop().split(".")[0]
+        );
+      }
+      const uploadedResponse = await cloudinary.uploader.upload(profilePic);
+      profilePic = uploadedResponse.secure_url;
+    }
+
     user.name = name || user.name;
     user.email = email || user.email;
     user.username = username || user.username;
@@ -162,10 +179,12 @@ const updateUser = async (req, res) => {
 
     user = await user.save();
 
-    res.status(200).json({ message: "Profile updated successfully", user });
+    user.password = null;
+
+    res.status(200).json({ user });
   } catch (error) {
-    console.error("Error in followUnFollowUser:", error.message);
-    res.status(500).json({ message: error.message });
+    console.error("Error in updateUser:", error.message);
+    res.status(500).json({ error: error.message });
   }
 };
 

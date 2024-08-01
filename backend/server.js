@@ -19,11 +19,11 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-app.use(express.json()); // Middleware para parsing de JSON
+app.use(express.json({ limit: "50mb" })); // Middleware para parsing de JSON
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser()); // Use cookie-parser middleware
 
 app.use("/api/users", userRoutes); // Defina a rota base para suas rotas de usuários
-app.use("/api/post", postRoutes);
+app.use("/api/posts", postRoutes);
 
 app.listen(PORT, () => console.log(`Server started at port ${PORT}`));

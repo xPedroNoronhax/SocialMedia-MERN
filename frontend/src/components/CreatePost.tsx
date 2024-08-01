@@ -21,24 +21,68 @@ import {
 import { useRef, useState } from "react";
 import usePreviewImg from "../hooks/usePreviewImg";
 import { BsFillImageFill } from "react-icons/bs";
-
+import { useRecoilValue } from "recoil";
+import userAtom from "../atoms/userAtom";
+import useShowToast from "../hooks/useShowToast";
+const MAX_CHAR = 500;
 const CreatePost = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [postText, setPostText] = useState("");
   const { handleImageChange, imgUrl, setImgUrl } = usePreviewImg();
   const imageRef = useRef<HTMLInputElement>(null);
-
-  const handleTextChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setPostText(event.target.value);
+  const [remainingCharacters, setRemainingCharacters] = useState(MAX_CHAR);
+  const user = useRecoilValue(userAtom);
+  const showToast = useShowToast();
+  const [loading, setLoading] = useState(false);
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const inputText = e.target.value;
+    if (inputText.length > MAX_CHAR) {
+    //   const truncatedText = inputText.slice(0, MAX_CHAR);
+      setRemainingCharacters(0);
+    } else {
+      setPostText(inputText);
+      setRemainingCharacters(MAX_CHAR - inputText.length);
+    }
   };
 
-  const handleCreatePost = async () => {};
+  const handleCreatePost = async () => {
+    setLoading(true);
+    try {
+      console.log({ postedBy: user._id, text: postText, img: imgUrl });
+      const res = await fetch("/api/posts/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          postedBy: user._id,
+          text: postText,
+          img: imgUrl,
+        }),
+      });
 
+      const data = await res.json();
+      if (data.error) {
+        showToast("Error", data.error, "error");
+        return;
+      }
+      showToast("Success", "Post created successfully", "success");
+      onClose();
+      setPostText("");
+      setImgUrl("");
+    } catch (error) {
+      showToast("Error", "error in create a post", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
   const handleImageClick = () => {
     if (imageRef.current) {
       imageRef.current.click();
     }
   };
+
+  const processedImgUrl = typeof imgUrl === "string" ? imgUrl : undefined;
 
   return (
     <>
@@ -72,7 +116,7 @@ const CreatePost = () => {
                 m={"1"}
                 color={"gray.800"}
               >
-                {postText.length}/500
+                {remainingCharacters}/{MAX_CHAR}
               </Text>
               <Input
                 type="file"
@@ -88,9 +132,9 @@ const CreatePost = () => {
               />
             </FormControl>
 
-            {imgUrl && (
+            {processedImgUrl && (
               <Flex mt={5} w={"full"} position={"relative"}>
-                <Image src={imgUrl} alt="Selected img" />
+                <Image src={processedImgUrl} alt="Selected img" />
                 <CloseButton
                   bg={"gray.800"}
                   position={"absolute"}
@@ -105,7 +149,12 @@ const CreatePost = () => {
           </ModalBody>
 
           <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={handleCreatePost}>
+            <Button
+              isLoading={loading}
+              colorScheme="blue"
+              mr={3}
+              onClick={handleCreatePost}
+            >
               Post
             </Button>
           </ModalFooter>

@@ -45,8 +45,19 @@ const UserHeader = ({ user }: Props) => {
     user.followers.includes(currentUser._id)
   );
   const showToast = useShowToast();
+  const [updating, setUpdating] = useState(false);
 
   const handleFollowUnfollow = async () => {
+    if (!currentUser) {
+      showToast("Error", "Plase login to follow", "error");
+      return;
+    }
+
+    if (updating) {
+      return;
+    }
+
+    setUpdating(true);
     try {
       const res = await fetch(`/api/users/follow/${user._id}`, {
         method: "POST",
@@ -59,11 +70,19 @@ const UserHeader = ({ user }: Props) => {
         showToast("error", data.error, "error");
         return;
       }
-
+      if (following) {
+        showToast("Success", `Unfollowed ${user.name}`, "success");
+        user.followers.pop();
+      } else {
+        showToast("Success", `Followed ${user.name}`, "success");
+        user.followers.push(currentUser._id);
+      }
       setFollowing(!following);
       console.log(data);
     } catch (error) {
       showToast("error", "something wents wrong", "error");
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -132,11 +151,9 @@ const UserHeader = ({ user }: Props) => {
         </Link>
       )}
       {currentUser._id !== user._id && (
-        
-          <Button size={"sm"} onClick={handleFollowUnfollow}>
-            {following ? "Unfollow" : "Follow"}
-          </Button>
-        
+        <Button size={"sm"} onClick={handleFollowUnfollow} isLoading={updating}>
+          {following ? "Unfollow" : "Follow"}
+        </Button>
       )}
       <Flex w={"full"} justifyContent={"space-between"}>
         <Flex gap={2} alignItems={"center"}>

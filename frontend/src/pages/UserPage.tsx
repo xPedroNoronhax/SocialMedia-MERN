@@ -6,7 +6,7 @@ import useShowToast from "../hooks/useShowToast";
 import { Flex, Spinner } from "@chakra-ui/react";
 
 const UserPage = () => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<null>(null);
   const { username } = useParams();
   const showToast = useShowToast();
   const [loading, setLoading] = useState(true);
@@ -40,7 +40,7 @@ const UserPage = () => {
   if (!user && !loading) return <h1>User not found</h1>;
   return (
     <>
-      <UserHeader user={user} />
+      {user && <UserHeader user={user} />}
       <UserPost
         likes={1200}
         replies={481}

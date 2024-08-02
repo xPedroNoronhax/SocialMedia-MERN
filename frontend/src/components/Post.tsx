@@ -5,6 +5,7 @@ import Actions from "./Actions";
 import { useEffect, useState } from "react";
 import useShowToast from "../hooks/useShowToast";
 
+// Tipos ajustados para refletir a estrutura correta de dados
 type User = {
   _id: string;
   username: string;
@@ -12,7 +13,7 @@ type User = {
 };
 
 type Reply = {
-  userId: User;
+  userId: User; // Mantenha a tipagem do usuário em Reply
   text: string;
   userProfilePic?: string;
   username?: string;
@@ -21,7 +22,7 @@ type Reply = {
 type PostProps = {
   post: {
     _id: string;
-    postedBy: User;
+    postedBy: string; // ID do usuário como string
     text: string;
     img?: string;
     likes: User[];
@@ -32,8 +33,9 @@ type PostProps = {
 
 const Post = ({ post }: PostProps) => {
   const [liked, setLiked] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const showToast = useShowToast();
+
   useEffect(() => {
     const getUser = async () => {
       if (!post.postedBy) {
@@ -44,7 +46,6 @@ const Post = ({ post }: PostProps) => {
       try {
         const res = await fetch(`/api/users/profile/${post.postedBy}`);
         const data = await res.json();
-        console.log(data);
         if (data.error) {
           showToast("Error", "Error in fetching user profile", "error");
           return;
@@ -57,11 +58,13 @@ const Post = ({ post }: PostProps) => {
     };
     getUser();
   }, [post.postedBy, showToast]);
+
   if (!user) return null;
+
   return (
     <Flex gap={3} mb={4} py={5}>
       <Flex flexDirection={"column"} alignItems={"center"}>
-        <Avatar size={"md"} name={user.name} src={user.profilePic} />
+        <Avatar size={"md"} name={user.username} src={user.profilePic} />
         <Box w={"1px"} h={"full"} bg={"gray.light"} my={2}></Box>
         <Box position={"relative"} w={"full"}>
           {post.replies.slice(0, 3).map((reply, index) => (
@@ -84,7 +87,7 @@ const Post = ({ post }: PostProps) => {
         <Flex justifyContent={"space-between"} w={"full"}>
           <Flex w={"full"} alignItems={"center"}>
             <Text fontSize={"sm"} fontWeight={"bold"}>
-              {user?.username}
+              {user.username}
             </Text>
             <Image src="/verified.png" w={4} h={4} ml={1} />
           </Flex>
@@ -95,7 +98,7 @@ const Post = ({ post }: PostProps) => {
             <BsThreeDots />
           </Flex>
         </Flex>
-        <Link to={`/user/${post.postedBy._id}/post/${post._id}`}>
+        <Link to={`/user/${post.postedBy}/post/${post._id}`}>
           <Text fontSize={"sm"}>{post.text}</Text>
           {post.img && (
             <Box

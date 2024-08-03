@@ -31,7 +31,7 @@ type PostProps = {
 };
 
 const Post = ({ post }: PostProps) => {
-  const [liked, setLiked] = useState<boolean>(false);
+  
   const [user, setUser] = useState<User | null>(null);
   const showToast = useShowToast();
   const navigate = useNavigate();
@@ -61,9 +61,9 @@ const Post = ({ post }: PostProps) => {
   if (!user) return null;
 
   return (
-    <Link to={`/${user.username}/post/${post._id}`}>
-      <Flex gap={3} mb={4} py={5}>
-        <Flex flexDirection={"column"} alignItems={"center"}>
+    <Flex gap={3} mb={4} py={5}>
+      <Flex flexDirection={"column"} alignItems={"center"}>
+        <Link to={`/${user.username}/post/${post._id}`}>
           <Avatar
             size={"md"}
             name={user.username}
@@ -73,27 +73,29 @@ const Post = ({ post }: PostProps) => {
               navigate(`/${user.username}`);
             }}
           />
-          <Box w={"1px"} h={"full"} bg={"gray.light"} my={2}></Box>
-          <Box position={"relative"} w={"full"}>
-            {post.replies.length === 0 && <Text textAlign={"center"}>🥱</Text>}
-            {post.replies.slice(0, 3).map((reply, index) => (
-              <Avatar
-                key={index}
-                size={"xs"}
-                name={reply.username}
-                src={reply.userProfilePic}
-                position={"absolute"}
-                top={index === 0 ? "0px" : undefined}
-                bottom={index > 0 ? "0px" : undefined}
-                left={index === 2 ? "4px" : undefined}
-                right={index === 1 ? "-5px" : undefined}
-                padding={"2px"}
-              />
-            ))}
-          </Box>
-        </Flex>
-        <Flex flex={1} flexDirection={"column"} gap={2}>
-          <Flex justifyContent={"space-between"} w={"full"}>
+        </Link>
+        <Box w={"1px"} h={"full"} bg={"gray.light"} my={2}></Box>
+        <Box position={"relative"} w={"full"}>
+          {post.replies.length === 0 && <Text textAlign={"center"}>🥱</Text>}
+          {post.replies.slice(0, 3).map((reply, index) => (
+            <Avatar
+              key={index}
+              size={"xs"}
+              name={reply.username}
+              src={reply.userProfilePic}
+              position={"absolute"}
+              top={index === 0 ? "0px" : undefined}
+              bottom={index > 0 ? "0px" : undefined}
+              left={index === 2 ? "4px" : undefined}
+              right={index === 1 ? "-5px" : undefined}
+              padding={"2px"}
+            />
+          ))}
+        </Box>
+      </Flex>
+      <Flex flex={1} flexDirection={"column"} gap={2}>
+        <Flex justifyContent={"space-between"} w={"full"}>
+          <Link to={`/${user.username}/post/${post._id}`}>
             <Flex w={"full"} alignItems={"center"}>
               <Text
                 fontSize={"sm"}
@@ -107,45 +109,37 @@ const Post = ({ post }: PostProps) => {
               </Text>
               <Image src="/verified.png" w={4} h={4} ml={1} />
             </Flex>
-            <Flex gap={4} alignItems={"center"}>
-              <Text
-                fontSize={"xs"}
-                width={36}
-                textAlign={"right"}
-                color={"gray.light"}
-              >
-                {formatDistanceToNow(new Date(post.createdAt))} ago
-              </Text>
-            </Flex>
-          </Flex>
-          <Link to={`/user/${post.postedBy}/post/${post._id}`}>
-            <Text fontSize={"sm"}>{post.text}</Text>
-            {post.img && (
-              <Box
-                borderRadius={6}
-                overflow={"hidden"}
-                border={"1px solid "}
-                borderColor={"gray.light"}
-              >
-                <Image src={post.img} w={"full"} />
-              </Box>
-            )}
           </Link>
-          <Flex gap={3} my={1}>
-            <Actions liked={liked} setLiked={setLiked} />
-          </Flex>
-          <Flex gap={2} alignItems={"center"}>
-            <Text color={"gray.light"} fontSize={"sml"}>
-              {post.replies.length} replies
-            </Text>
-            <Box w={0.5} h={0.5} borderRadius={"full"} bg={"gray.light"}></Box>
-            <Text color={"gray.light"} fontSize={"sml"}>
-              {Number(post.likes.length) + (liked ? 1 : 0)} likes
+          <Flex gap={4} alignItems={"center"}>
+            <Text
+              fontSize={"xs"}
+              width={36}
+              textAlign={"right"}
+              color={"gray.light"}
+            >
+              {formatDistanceToNow(new Date(post.createdAt))} ago
             </Text>
           </Flex>
         </Flex>
+        <Link to={`/user/${post.postedBy}/post/${post._id}`}>
+          <Text fontSize={"sm"}>{post.text}</Text>
+          {post.img && (
+            <Box
+              borderRadius={6}
+              overflow={"hidden"}
+              border={"1px solid "}
+              borderColor={"gray.light"}
+            >
+              <Image src={post.img} w={"full"} />
+            </Box>
+          )}
+        </Link>
+        <Flex gap={3} my={1}>
+          <Actions post={post}  />
+        </Flex>
+
       </Flex>
-    </Link>
+    </Flex>
   );
 };
 

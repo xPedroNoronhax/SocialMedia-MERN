@@ -15,30 +15,32 @@ type User = {
 };
 
 type Reply = {
-  userId: User; // Mantenha a tipagem do usuário em Reply
+  userId: User;
   text: string;
   userProfilePic?: string;
   username?: string;
 };
 
-type PostProps = {
-  post: {
-    _id: string;
-    postedBy: string; // ID do usuário como string
-    text: string;
-    img?: string;
-    likes: User[];
-    replies: Reply[];
-    createdAt: string;
-  };
+type PostType = {
+  _id: string;
+  postedBy: string; // ID do usuário como string
+  text: string;
+  img?: string;
+  likes: User[];
+  replies: Reply[];
+  createdAt: string;
 };
 
+type PostProps = {
+  post: PostType;
+};
 const Post = ({ post }: PostProps) => {
   const [user, setUser] = useState<User | null>(null);
 
   const showToast = useShowToast();
   const currentUser = useRecoilValue(userAtom);
   const navigate = useNavigate();
+
   useEffect(() => {
     const getUser = async () => {
       if (!post.postedBy) {

@@ -21,19 +21,19 @@ import { Link as RouterLink } from "react-router-dom";
 import { useState } from "react";
 import useShowToast from "../hooks/useShowToast";
 
-interface User {
+export type User = {
   _id: string;
   name: string;
   username: string;
   email: string;
   password: string;
-  profilePic: string;
+  profilePic?: string;
   followers: string[];
   following: string[];
   bio: string;
   createdAt: string;
   updatedAt: string;
-}
+};
 
 type Props = {
   user: User;

@@ -30,7 +30,7 @@ const App = () => {
           element={user ? <UpdateProfilePage /> : <Navigate to="/auth" />}
         />
         <Route path="/:username" element={<UserPage />} />
-        <Route path="/:username/post/:pid" element={<PostPage />} />
+        <Route path="/user/:username/post/:pid" element={<PostPage />} />
       </Routes>
 
       {user && <LogoutButton />}

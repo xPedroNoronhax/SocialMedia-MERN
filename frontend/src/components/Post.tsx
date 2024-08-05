@@ -4,6 +4,9 @@ import Actions from "./Actions";
 import { useEffect, useState } from "react";
 import useShowToast from "../hooks/useShowToast";
 import { formatDistanceToNow } from "date-fns";
+import { DeleteIcon } from "@chakra-ui/icons";
+import { useRecoilValue } from "recoil";
+import userAtom from "../atoms/userAtom";
 // Tipos ajustados para refletir a estrutura correta de dados
 type User = {
   _id: string;
@@ -31,9 +34,10 @@ type PostProps = {
 };
 
 const Post = ({ post }: PostProps) => {
-  
   const [user, setUser] = useState<User | null>(null);
+
   const showToast = useShowToast();
+  const currentUser = useRecoilValue(userAtom);
   const navigate = useNavigate();
   useEffect(() => {
     const getUser = async () => {
@@ -57,6 +61,24 @@ const Post = ({ post }: PostProps) => {
     };
     getUser();
   }, [post.postedBy, showToast]);
+
+  const handleDeletePost = async (e: { preventDefault: () => void }) => {
+    e.preventDefault();
+    try {
+      if (!window.confirm("Are you sure you want to delete this post?")) return;
+      const res = await fetch(`api/posts/${post._id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.error) {
+        showToast("Error", data.error, "error");
+        return;
+      }
+      showToast("Success", "Post deleted", "success");
+    } catch (error) {
+      showToast("Error", "Error in delete a post", "error");
+    }
+  };
 
   if (!user) return null;
 
@@ -119,6 +141,13 @@ const Post = ({ post }: PostProps) => {
             >
               {formatDistanceToNow(new Date(post.createdAt))} ago
             </Text>
+            {currentUser?._id === user._id && (
+              <DeleteIcon
+                fontSize={20}
+                onClick={handleDeletePost}
+                cursor={"pointer"}
+              />
+            )}
           </Flex>
         </Flex>
         <Link to={`/user/${post.postedBy}/post/${post._id}`}>
@@ -135,9 +164,8 @@ const Post = ({ post }: PostProps) => {
           )}
         </Link>
         <Flex gap={3} my={1}>
-          <Actions post={post}  />
+          <Actions post={post} />
         </Flex>
-
       </Flex>
     </Flex>
   );

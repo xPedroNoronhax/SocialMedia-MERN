@@ -5,32 +5,13 @@ import { useEffect, useState } from "react";
 import useShowToast from "../hooks/useShowToast";
 import { formatDistanceToNow } from "date-fns";
 import { DeleteIcon } from "@chakra-ui/icons";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
+import { User, Post as Post_ } from "../types";
+import postsAtom from "../atoms/postsAtom";
 // Tipos ajustados para refletir a estrutura correta de dados
-type User = {
-  _id: string;
-  username: string;
-  profilePic?: string;
-};
-
-type Reply = {
-  userId: User; // Mantenha a tipagem do usuário em Reply
-  text: string;
-  userProfilePic?: string;
-  username?: string;
-};
-
 type PostProps = {
-  post: {
-    _id: string;
-    postedBy: string; // ID do usuário como string
-    text: string;
-    img?: string;
-    likes: User[];
-    replies: Reply[];
-    createdAt: string;
-  };
+  post: Post_;
 };
 
 const Post = ({ post }: PostProps) => {
@@ -38,7 +19,9 @@ const Post = ({ post }: PostProps) => {
 
   const showToast = useShowToast();
   const currentUser = useRecoilValue(userAtom);
+  const [posts, setPosts] = useRecoilState(postsAtom);
   const navigate = useNavigate();
+
   useEffect(() => {
     const getUser = async () => {
       if (!post.postedBy) {
@@ -75,6 +58,7 @@ const Post = ({ post }: PostProps) => {
         return;
       }
       showToast("Success", "Post deleted", "success");
+      setPosts(posts.filter((p) => p._id !== post._id));
     } catch (error) {
       showToast("Error", "Error in delete a post", "error");
     }

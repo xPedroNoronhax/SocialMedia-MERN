@@ -35,9 +35,7 @@ const createPost = async (req, res) => {
 
     // Suponho que haja uma lógica aqui para criar o post no banco de dados
     const newPost = await Post.create({ postedBy, text, img: imgUrl });
-    res
-      .status(201)
-      .json({ message: "Post created successfully", post: newPost });
+    res.status(201).json(newPost);
   } catch (error) {
     res.status(500).json({ error: "Server error" });
   }
@@ -50,7 +48,7 @@ const getPost = async (req, res) => {
       return res.status(404).json({ error: "Post not found" });
     }
 
-    res.status(200).json({ post });
+    res.status(200).json(post);
   } catch (error) {
     res.status(500).json({ error: error.message });
     console.log(error);
@@ -131,7 +129,7 @@ const replyToPost = async (req, res) => {
     post.replies.push(reply);
     await post.save();
 
-    res.status(200).json({ message: "Reply added successfully", post });
+    res.status(200).json(reply);
   } catch (error) {
     res.status(500).json({ error: error.message });
     console.log(error);

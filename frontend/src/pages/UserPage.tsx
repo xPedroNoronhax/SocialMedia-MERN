@@ -4,36 +4,24 @@ import { useParams } from "react-router-dom";
 import useShowToast from "../hooks/useShowToast";
 import { Flex, Spinner } from "@chakra-ui/react";
 import Post from "../components/Post";
+import useGetUserProfile from "../hooks/useGetUserProfile";
+
+import { useRecoilState } from "recoil";
+import postsAtom from "../atoms/postsAtom";
 
 const UserPage = () => {
-  const [user, setUser] = useState<null>(null);
+  const { user, loading } = useGetUserProfile();
   const { username } = useParams();
   const showToast = useShowToast();
-  const [loading, setLoading] = useState(true);
-  const [posts, setPosts] = useState([]);
-  const [fetchingPosts, setFetchingPosts] = useState(true);
-  useEffect(() => {
-    const getUser = async () => {
-      try {
-        const res = await fetch(`/api/users/profile/${username}`);
-        const data = await res.json();
-        console.log(data);
-        if (data.error) {
-          showToast("Error", data.error, "error");
-          return;
-        }
-        setUser(data);
-      } catch (error) {
-        showToast("Error", "Impossible identify the user", "error");
-      } finally {
-        setLoading(false);
-      }
-    };
 
+  const [posts, setPosts] = useRecoilState(postsAtom);
+  const [fetchingPosts, setFetchingPosts] = useState(true);
+
+  useEffect(() => {
     const getPosts = async () => {
       setFetchingPosts(true);
       try {
-        const res = await fetch(`api/posts/user/${username}`);
+        const res = await fetch(`/api/posts/user/${username}`);
         const data = await res.json();
         console.log(data);
         setPosts(data);
@@ -45,17 +33,18 @@ const UserPage = () => {
       }
     };
 
-    getUser();
     getPosts();
-  }, [username, showToast]);
+  }, [username, showToast, setPosts]);
+
   if (!user && loading) {
     return (
       <Flex justifyContent={"center"}>
-        <Spinner size="xl" />;
+        <Spinner size="xl" />
       </Flex>
     );
   }
   if (!user && !loading) return <h1>User not found</h1>;
+
   return (
     <>
       {user && <UserHeader user={user} />}
@@ -66,7 +55,7 @@ const UserPage = () => {
         </Flex>
       )}
       {posts.map((post) => (
-        <Post key={post._id} post={post} postedBy={post.postedBy} />
+        <Post key={post._id} post={post} />
       ))}
     </>
   );

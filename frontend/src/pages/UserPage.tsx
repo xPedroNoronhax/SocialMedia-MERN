@@ -6,43 +6,15 @@ import { Flex, Spinner } from "@chakra-ui/react";
 import Post from "../components/Post";
 import useGetUserProfile from "../hooks/useGetUserProfile";
 
-export type User = {
-  _id: string;
-  name: string;
-  username: string;
-  email: string;
-  password: string;
-  profilePic?: string;
-  followers: string[];
-  following: string[];
-  bio: string;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type Reply = {
-  userId: User;
-  text: string;
-  userProfilePic?: string;
-  username?: string;
-};
-
-type PostType = {
-  _id: string;
-  postedBy: string; // ID do usuário como string
-  text: string;
-  img?: string;
-  likes: User[];
-  replies: Reply[];
-  createdAt: string;
-};
+import { useRecoilState } from "recoil";
+import postsAtom from "../atoms/postsAtom";
 
 const UserPage = () => {
   const { user, loading } = useGetUserProfile();
   const { username } = useParams();
   const showToast = useShowToast();
 
-  const [posts, setPosts] = useState<PostType[]>([]);
+  const [posts, setPosts] = useRecoilState(postsAtom);
   const [fetchingPosts, setFetchingPosts] = useState(true);
 
   useEffect(() => {
@@ -62,7 +34,7 @@ const UserPage = () => {
     };
 
     getPosts();
-  }, [username, showToast]);
+  }, [username, showToast, setPosts]);
 
   if (!user && loading) {
     return (

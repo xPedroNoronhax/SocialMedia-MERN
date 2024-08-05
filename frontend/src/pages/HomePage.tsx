@@ -3,38 +3,18 @@ import { useEffect, useState } from "react";
 
 import useShowToast from "../hooks/useShowToast";
 import Post from "../components/Post";
-
-type User = {
-  _id: string;
-  username: string;
-  profilePic?: string;
-};
-
-type Reply = {
-  userId: User;
-  text: string;
-  userProfilePic?: string;
-  username?: string;
-};
-
-type PostData = {
-  _id: string;
-  postedBy: string; // Atualizado para string (ID) em vez de User
-  text: string;
-  img?: string;
-  likes: User[];
-  replies: Reply[];
-  createdAt: string;
-};
+import { useRecoilState } from "recoil";
+import postsAtom from "../atoms/postsAtom";
 
 const HomePage = () => {
-  const [posts, setPosts] = useState<PostData[]>([]);
+  const [posts, setPosts] = useRecoilState(postsAtom);
   const [loading, setLoading] = useState(true);
   const showToast = useShowToast();
 
   useEffect(() => {
     const getFeedPosts = async () => {
       setLoading(true);
+      setPosts([])
       try {
         const res = await fetch("/api/posts/feed");
         const data = await res.json();
@@ -51,7 +31,7 @@ const HomePage = () => {
       }
     };
     getFeedPosts();
-  }, [showToast]);
+  }, [showToast, setPosts]);
   return (
     <>
       {!loading && posts.length === 0 && (

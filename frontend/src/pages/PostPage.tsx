@@ -11,25 +11,29 @@ import {
 import Actions from "../components/Actions";
 import Comment from "../components/Comment";
 import useGetUserProfile from "../hooks/useGetUserProfile";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import useShowToast from "../hooks/useShowToast";
 import { useNavigate, useParams } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
 import { DeleteIcon } from "@chakra-ui/icons";
-import { Post, User } from "../types";
+import { User } from "../types";
+import postsAtom from "../atoms/postsAtom";
 
 const PostPage = () => {
   const { user, loading: userLoading } = useGetUserProfile();
-  const [post, setPost] = useState<Post | null>(null);
+
+  const [posts, setPosts] = useRecoilState(postsAtom);
   const showToast = useShowToast();
   const { pid } = useParams<{ pid: string }>();
   const currentUser = useRecoilValue<User | null>(userAtom); // Ajuste aqui para aceitar null
   const navigate = useNavigate();
 
+  const currentPost = posts[0];
   useEffect(() => {
     const getPost = async () => {
+      setPosts([]);
       try {
         const res = await fetch(`/api/posts/${pid}`);
         if (!res.ok) throw new Error("Network response was not ok");
@@ -38,20 +42,20 @@ const PostPage = () => {
           showToast("Error", data.error, "error");
           return;
         }
-        setPost(data);
+        setPosts([data]);
       } catch (error) {
         showToast("Error", "Error in getting the post", "error");
       }
     };
     getPost();
-  }, [showToast, pid]);
+  }, [showToast, pid, setPosts]);
 
   const handleDeletePost = async () => {
     try {
       if (!window.confirm("Are you sure you want to delete this post?")) return;
-      if (!post) return; // Verifique se o post está definido
+      if (!currentPost) return; // Verifique se o post está definido
 
-      const res = await fetch(`/api/posts/${post._id}`, {
+      const res = await fetch(`/api/posts/${currentPost._id}`, {
         method: "DELETE",
       });
       const data = await res.json();
@@ -76,22 +80,22 @@ const PostPage = () => {
     );
   }
 
-  if (!post) return null;
+  if (!currentPost) return null;
 
   return (
     <>
       <Flex>
         <Flex w={"full"} alignItems={"center"} gap={3}>
-          {post.postedBy && (
+          {currentPost.postedBy && (
             <>
               <Avatar
-                src={post.postedBy.profilePic}
+                src={currentPost.postedBy.profilePic}
                 size={"md"}
-                name={post.postedBy.username}
+                name={currentPost.postedBy.username}
               />
               <Flex>
                 <Text fontSize={"sm"} fontWeight={"bold"}>
-                  {post.postedBy.username}
+                  {currentPost.postedBy.username}
                 </Text>
                 <Image src="/verified.png" w={4} h={4} ml={4} />
               </Flex>
@@ -105,11 +109,11 @@ const PostPage = () => {
             textAlign={"right"}
             color={"gray.light"}
           >
-            {formatDistanceToNow(new Date(post.createdAt))} ago
+            {formatDistanceToNow(new Date(currentPost.createdAt))} ago
           </Text>
           {currentUser &&
-            post.postedBy &&
-            currentUser._id === post.postedBy._id && (
+            currentPost.postedBy &&
+            currentUser._id === currentPost.postedBy._id && (
               <DeleteIcon
                 fontSize={20}
                 onClick={handleDeletePost}
@@ -119,20 +123,20 @@ const PostPage = () => {
         </Flex>
       </Flex>
 
-      <Text my={3}>{post.text}</Text>
-      {post.img && (
+      <Text my={3}>{currentPost.text}</Text>
+      {currentPost.img && (
         <Box
           borderRadius={6}
           overflow={"hidden"}
           border={"1px solid "}
           borderColor={"gray.light"}
         >
-          <Image src={post.img} w={"full"} />
+          <Image src={currentPost.img} w={"full"} />
         </Box>
       )}
 
       <Flex gap={3} my={3}>
-        <Actions post={post} />
+        <Actions post={currentPost} />
       </Flex>
 
       <Divider my={4} />
@@ -146,11 +150,14 @@ const PostPage = () => {
       </Flex>
 
       <Divider my={4} />
-      {post.replies.map((reply) => (
+      {currentPost.replies.map((reply) => (
         <Comment
           key={reply._id}
           reply={reply}
-          lastReply={reply._id === post.replies[post.replies.length - 1]._id}
+          lastReply={
+            reply._id ===
+            currentPost.replies[currentPost.replies.length - 1]._id
+          }
         />
       ))}
     </>

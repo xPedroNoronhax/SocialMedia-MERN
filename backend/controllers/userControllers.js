@@ -5,23 +5,21 @@ import generateTokenAndSetCookie from "../utils/helpers/generateTokenAndSetCooki
 import { v2 as cloudinary } from "cloudinary";
 import mongoose from "mongoose";
 const getUserProfile = async (req, res) => {
-  // We will fetch user profile either with username or userId
-  // query is either username or userId
   const { query } = req.params;
+
+  if (!query) {
+    return res.status(400).json({ error: "Query parameter is required" });
+  }
 
   try {
     let user;
 
-    // query is userId
     if (mongoose.Types.ObjectId.isValid(query)) {
-      user = await User.findOne({ _id: query })
-        .select("-password")
-        .select("-updatedAt");
+      user = await User.findOne({ _id: query }).select("-password -updatedAt");
     } else {
-      // query is username
-      user = await User.findOne({ username: query })
-        .select("-password")
-        .select("-updatedAt");
+      user = await User.findOne({ username: query }).select(
+        "-password -updatedAt"
+      );
     }
 
     if (!user) return res.status(404).json({ error: "User not found" });
@@ -32,6 +30,7 @@ const getUserProfile = async (req, res) => {
     console.log("Error in getUserProfile: ", err.message);
   }
 };
+
 const signupUser = async (req, res) => {
   try {
     const { name, email, username, password } = req.body;

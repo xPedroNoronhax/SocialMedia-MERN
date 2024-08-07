@@ -20,36 +20,24 @@ import { useRecoilValue } from "recoil";
 import { Link as RouterLink } from "react-router-dom";
 import { useState } from "react";
 import useShowToast from "../hooks/useShowToast";
-
-export type User = {
-  _id: string;
-  name: string;
-  username: string;
-  email: string;
-  password: string;
-  profilePic?: string;
-  followers: string[];
-  following: string[];
-  bio: string;
-  createdAt: string;
-  updatedAt: string;
-};
+import { User } from "../types"; // Certifique-se de que o caminho para o tipo User está correto
 
 type Props = {
   user: User;
 };
+
 const UserHeader = ({ user }: Props) => {
   const toast = useToast();
   const currentUser = useRecoilValue(userAtom);
   const [following, setFollowing] = useState(
-    user.followers.includes(currentUser?._id)
+    currentUser ? user.followers.includes(currentUser._id) : false
   );
   const showToast = useShowToast();
   const [updating, setUpdating] = useState(false);
 
   const handleFollowUnfollow = async () => {
     if (!currentUser) {
-      showToast("Error", "Plase login to follow", "error");
+      showToast("Error", "Please login to follow", "error");
       return;
     }
 
@@ -67,20 +55,22 @@ const UserHeader = ({ user }: Props) => {
       });
       const data = await res.json();
       if (data.error) {
-        showToast("error", data.error, "error");
+        showToast("Error", data.error, "error");
         return;
       }
       if (following) {
         showToast("Success", `Unfollowed ${user.name}`, "success");
-        user.followers.pop();
+        // Remove follower from the user object
+        user.followers = user.followers.filter((id) => id !== currentUser._id);
       } else {
         showToast("Success", `Followed ${user.name}`, "success");
-        user.followers.push(currentUser?._id);
+        // Add follower to the user object
+        user.followers.push(currentUser._id);
       }
       setFollowing(!following);
       console.log(data);
     } catch (error) {
-      showToast("error", "something wents wrong", "error");
+      showToast("Error", "Something went wrong", "error");
     } finally {
       setUpdating(false);
     }
@@ -90,7 +80,7 @@ const UserHeader = ({ user }: Props) => {
     const currentURL = window.location.href;
     navigator.clipboard.writeText(currentURL).then(() => {
       toast({
-        title: "Success.",
+        title: "Success",
         status: "success",
         description: "Profile link copied.",
         duration: 3000,
@@ -120,7 +110,7 @@ const UserHeader = ({ user }: Props) => {
           </Flex>
         </Box>
         <Box>
-          {user.profilePic && (
+          {user.profilePic ? (
             <Avatar
               name={user.name}
               src={user.profilePic}
@@ -129,8 +119,7 @@ const UserHeader = ({ user }: Props) => {
                 md: "xl",
               }}
             />
-          )}
-          {!user.profilePic && (
+          ) : (
             <Avatar
               name={user.name}
               src="https://bit.ly/broken-link"

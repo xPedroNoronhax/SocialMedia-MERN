@@ -37,7 +37,7 @@ const CreatePost = () => {
   const showToast = useShowToast();
   const [loading, setLoading] = useState(false);
   const [post, setPosts] = useRecoilState(postsAtom);
-  const { username } = useParams()
+  const { username } = useParams();
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const inputText = e.target.value;
@@ -53,38 +53,43 @@ const CreatePost = () => {
   const handleCreatePost = async () => {
     setLoading(true);
     try {
-      console.log({ postedBy: user._id, text: postText, img: imgUrl });
-      const res = await fetch("/api/posts/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          postedBy: user._id,
-          text: postText,
-          img: imgUrl,
-        }),
-      });
+      if (user?._id) {
+        console.log({ postedBy: user._id, text: postText, img: imgUrl });
+        const res = await fetch("/api/posts/create", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            postedBy: user._id,
+            text: postText,
+            img: imgUrl,
+          }),
+        });
 
-      const data = await res.json();
-      if (data.error) {
-        showToast("Error", data.error, "error");
-        return;
-      }
-      showToast("Success", "Post created successfully", "success");
-      if (username === user.username) {
-        setPosts([data, ...post]);
-      }
+        const data = await res.json();
+        if (data.error) {
+          showToast("Error", data.error, "error");
+          return;
+        }
+        showToast("Success", "Post created successfully", "success");
+        if (username === user.username) {
+          setPosts([data, ...post]);
+        }
 
-      onClose();
-      setPostText("");
-      setImgUrl("");
+        onClose();
+        setPostText("");
+        setImgUrl("");
+      } else {
+        showToast("Error", "User information is missing", "error");
+      }
     } catch (error) {
-      showToast("Error", "error in create a post", "error");
+      showToast("Error", "Error in creating a post", "error");
     } finally {
       setLoading(false);
     }
   };
+
   const handleImageClick = () => {
     if (imageRef.current) {
       imageRef.current.click();

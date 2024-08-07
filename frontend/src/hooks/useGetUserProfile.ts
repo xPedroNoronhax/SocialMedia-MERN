@@ -16,8 +16,6 @@ export type User = {
   updatedAt: string;
 };
 
-
-
 const useGetUserProfile = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);

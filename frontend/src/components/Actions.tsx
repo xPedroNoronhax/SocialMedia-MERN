@@ -18,9 +18,8 @@ import { useState } from "react";
 import useShowToast from "../hooks/useShowToast";
 import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
-
-import { Post } from "../types";
 import postsAtom from "../atoms/postsAtom";
+import { Post } from "../types";
 
 interface PostProps {
   post: Post;
@@ -28,9 +27,7 @@ interface PostProps {
 
 const Actions = ({ post }: PostProps) => {
   const user = useRecoilValue(userAtom);
-  const [liked, setLiked] = useState(
-    post.likes.some((like) => like._id === user?._id)
-  );
+  const [liked, setLiked] = useState(post.likes.includes(user?._id || ""));
   const showToast = useShowToast();
   const [posts, setPosts] = useRecoilState(postsAtom);
 
@@ -40,12 +37,13 @@ const Actions = ({ post }: PostProps) => {
   const [reply, setReply] = useState("");
 
   const handleLikeAndUnlike = async () => {
-    if (!user)
+    if (!user) {
       return showToast(
         "error",
         "You must be logged in to like a post",
         "error"
       );
+    }
     if (isLiking) return;
     setIsLiking(true);
     try {
@@ -57,24 +55,18 @@ const Actions = ({ post }: PostProps) => {
       });
       const data = await res.json();
       if (data.error) return showToast("Error", data.error, "error");
-      if (!liked) {
-        const updatedPosts = posts.map((p) => {
-          if (p._id === post._id) {
+
+      const updatedPosts = posts.map((p) => {
+        if (p._id === post._id) {
+          if (!liked) {
             return { ...p, likes: [...p.likes, user._id] };
-          }
-          return p;
-        });
-        setPosts(updatedPosts);
-      } else {
-        const updatedPosts = posts.map((p) => {
-          if (p._id === post._id) {
+          } else {
             return { ...p, likes: p.likes.filter((id) => id !== user._id) };
           }
-          return p;
-        });
-        setPosts(updatedPosts);
-      }
-
+        }
+        return p;
+      });
+      setPosts(updatedPosts);
       setLiked(!liked);
     } catch (error) {
       showToast("Error", "Error in Like or Unlike", "error");
@@ -84,12 +76,13 @@ const Actions = ({ post }: PostProps) => {
   };
 
   const handleReply = async () => {
-    if (!user)
+    if (!user) {
       return showToast(
         "Error",
         "You must be logged in to reply to a post",
         "error"
       );
+    }
     if (isReplying) return;
     setIsReplying(true);
     try {
@@ -207,7 +200,6 @@ const Actions = ({ post }: PostProps) => {
 };
 
 export default Actions;
-
 const RepostSVG = () => {
   return (
     <svg
@@ -222,7 +214,7 @@ const RepostSVG = () => {
       <title>Repost</title>
       <path
         fill=""
-        d="M19.998 9.497a1 1 0 0 0-1 1v4.228a3.274 3.274 0 0 1-3.27 3.27h-5.313l1.791-1.787a1 1 0 0 0-1.412-1.416L7.29 18.287a1.004 1.004 0 0 0-.294.707v.001c0 .023.012.042.013.065a.923.923 0 0 0 .281.643l3.502 3.504a1 1 0 0 0 1.414-1.414l-1.797-1.798h5.318a5.276 5.276 0 0 0 5.27-5.27v-4.228a1 1 0 0 0-1-1Zm-6.41-3.496-1.795 1.794a1 1 0 0 0 1.413 1.415l3.503-3.503a.99.99 0 0 0 .294-.708v-.001c0-.023-.013-.041-.013-.064a.92.92 0 0 0-.28-.643L12.41.787a1 1 0 0 0-1.414 1.415l1.798 1.798H7.476A5.276 5.276 0 0 0 2.21 9.27v4.225a1 1 0 1 0 2 0V9.27a3.274 3.274 0 0 1 3.266-3.27h5.322Z"
+        d="M19.998 9.497a1 1 0 0 0-1 1v4.228a3.274 3.274 0 0 1-3.27 3.27h-5.313l1.791-1.787a1 1 0 0 0-1.412-1.416L7.29 18.287a1.004 1.004 0 0 0-.294.707v.001c0 .023.012.042.013.065a.923.923 0 0 0 .281.643l3.502 3.504a1 1 0 0 0 1.414-1.414l-1.797-1.798h5.318a5.276 5.276 0 0 0 5.27-5.27v-4.228a1 1 0 0 0-1-1Zm-6.41-3.496-1.795 1.795a1 1 0 1 0 1.414 1.414l3.5-3.5a1.003 1.003 0 0 0 0-1.417l-3.5-3.5a1 1 0 0 0-1.414 1.414l1.794 1.794H8.27A5.277 5.277 0 0 0 3 9.271V13.5a1 1 0 0 0 2 0V9.271a3.275 3.275 0 0 1 3.271-3.27Z"
       ></path>
     </svg>
   );

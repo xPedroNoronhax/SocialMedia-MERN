@@ -28,5 +28,32 @@ export interface Post {
   createdAt: string;
   replies: Reply[];
   postedBy: User;
-  likes: User[];
+  likes: string[];
+}
+
+export interface IUser {
+  _id: string;
+  name: string;
+  username: string;
+  email: string;
+  password: string;
+  profilePic: string;
+  followers: string[];
+  following: string[];
+  bio: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IConversation {
+  _id: string;
+  participants: IUser[];
+  lastMessage: {
+    sender: IUser;
+    text: string;
+  };
+}
+export interface ILastMessage {
+  text: string;
+  sender: IUser;
 }

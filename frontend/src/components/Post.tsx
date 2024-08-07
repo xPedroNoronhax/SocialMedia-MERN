@@ -29,8 +29,12 @@ const Post = ({ post }: PostProps) => {
         return;
       }
 
+      // Se post.postedBy for um objeto, extraia o ID ou a propriedade correta
+      const userId =
+        typeof post.postedBy === "string" ? post.postedBy : post.postedBy._id;
+
       try {
-        const res = await fetch(`/api/users/profile/${post.postedBy}`);
+        const res = await fetch(`/api/users/profile/${userId}`);
         const data = await res.json();
         if (data.error) {
           showToast("Error", "Error in fetching user profile", "error");

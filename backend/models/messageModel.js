@@ -7,11 +7,17 @@ const messageSchema = new mongoose.Schema(
       ref: "Conversation",
     },
     sender: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    sender: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    text: String,
+    seen: {
+      type: Boolean,
+      default: false,
+    },
+    img: {
+      type: String,
+      default: "",
+    },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 const Message = mongoose.model("Message", messageSchema);

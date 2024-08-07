@@ -19,21 +19,37 @@ import useShowToast from "../hooks/useShowToast";
 export default function UpdateProfilePage() {
   const [user, setUser] = useRecoilState(userAtom);
   const [inputs, setInputs] = useState({
-    name: user.name,
-    username: user.username,
-    email: user.email,
-    bio: user.bio,
+    name: user?.name || "",
+    username: user?.username || "",
+    email: user?.email || "",
+    bio: user?.bio || "",
     password: "",
   });
   const fileRef = useRef<HTMLInputElement | null>(null);
   const [updating, setUpdating] = useState(false);
 
   const showToast = useShowToast();
-
   const { handleImageChange, imgUrl } = usePreviewImg();
+
+  // Função para garantir que a URL da imagem é uma string
+  const getImageSrc = () => {
+    if (typeof imgUrl === "string") {
+      return imgUrl;
+    }
+    if (imgUrl instanceof ArrayBuffer) {
+      const blob = new Blob([imgUrl]);
+      return URL.createObjectURL(blob);
+    }
+    return "";
+  };
+
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     if (updating) return;
+    if (!user) {
+      showToast("Error", "User is not logged in", "error");
+      return;
+    }
     setUpdating(true);
     try {
       const res = await fetch(`/api/users/update/${user._id}`, {
@@ -59,6 +75,7 @@ export default function UpdateProfilePage() {
       setUpdating(false);
     }
   };
+
   return (
     <form onSubmit={handleSubmit}>
       <Flex align={"center"} justify={"center"} my={6}>
@@ -80,7 +97,7 @@ export default function UpdateProfilePage() {
                 <Avatar
                   size="xl"
                   boxShadow={"md"}
-                  src={imgUrl || user.profilePic}
+                  src={getImageSrc() || user?.profilePic || ""}
                 />
               </Center>
               <Center w="full">

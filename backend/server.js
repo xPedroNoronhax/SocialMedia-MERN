@@ -4,6 +4,7 @@ import connectDB from "./db/connectDB.js";
 import cookieParser from "cookie-parser"; // Importe cookie-parser
 import userRoutes from "./routes/userRoutes.js"; // Importe suas rotas
 import postRoutes from "./routes/postRoutes.js";
+import messageRoutes from "./routes/messageRoutes.js";
 import { v2 as cloudinary } from "cloudinary";
 
 dotenv.config();
@@ -25,5 +26,6 @@ app.use(cookieParser()); // Use cookie-parser middleware
 
 app.use("/api/users", userRoutes); // Defina a rota base para suas rotas de usuários
 app.use("/api/posts", postRoutes);
+app.use("/api/messages", messageRoutes);
 
 app.listen(PORT, () => console.log(`Server started at port ${PORT}`));

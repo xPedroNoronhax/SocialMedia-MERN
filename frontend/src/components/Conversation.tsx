@@ -9,9 +9,10 @@ import {
   AvatarBadge,
 } from "@chakra-ui/react";
 import { IConversation } from "../types";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
 import { BsCheck2All } from "react-icons/bs";
+import { selectedConversationAtom } from "../atoms/messagesAtom";
 
 type Props = {
   conversation: IConversation;
@@ -19,15 +20,16 @@ type Props = {
 
 const Conversation = ({ conversation }: Props) => {
   const user = conversation.participants[0] || {}; // Garante que `user` não é `undefined`
+  console.log("User in Conversation component:", user);
   const currentUser = useRecoilValue(userAtom) || { _id: null }; // Define um valor padrão se `currentUser` for `null`
   const lastMessage = conversation.lastMessage || {}; // Garante que `lastMessage` não é `undefined`
+  const colorMode = useColorModeValue("gray.600", "gray.dark");
+  const [selectedConversation, setSelectedConversation] = useRecoilState(
+    selectedConversationAtom
+  );
 
   // Debug logs
-  console.log("Conversation data:", conversation);
-  console.log("User data:", user);
-  console.log("Current user:", currentUser);
-  console.log("Last message:", lastMessage);
-
+  console.log("selected conversation", selectedConversation);
   return (
     <Flex
       gap={4}
@@ -38,6 +40,15 @@ const Conversation = ({ conversation }: Props) => {
         bg: useColorModeValue("gray.600", "gray.dark"),
         color: "white",
       }}
+      onClick={() =>
+        setSelectedConversation({
+          _id: conversation._id,
+          userId: user._id,
+          userProfilePic: user.profilePic,
+          username: user.username,
+        })
+      }
+      bg={selectedConversation?._id === conversation._id ? colorMode : ""}
       borderRadius={"md"}
     >
       <WrapItem>

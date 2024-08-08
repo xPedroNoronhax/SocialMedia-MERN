@@ -1,4 +1,3 @@
-import React from "react";
 import SignUpCard from "../components/SignupCard";
 import LoginCard from "../components/LoginCard";
 import { useRecoilValue } from "recoil";

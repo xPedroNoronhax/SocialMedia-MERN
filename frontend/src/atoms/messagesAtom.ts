@@ -5,3 +5,13 @@ export const conversationsAtom = atom<IConversation[]>({
   key: "conversationsAtom",
   default: [],
 });
+
+export const selectedConversationAtom = atom({
+  key: "selectedConversationAtom",
+  default: {
+    _id: "",
+    userId: "",
+    username: "",
+    userProfilePic: "",
+  },
+});

@@ -89,6 +89,8 @@ async function getConversations(req, res) {
       select: "username profilePic",
     });
 
+    console.log("Populated conversations:", conversations);
+
     // remove the current user from the participants array
     conversations.forEach((conversation) => {
       console.log("Original participants:", conversation.participants);

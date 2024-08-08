@@ -57,3 +57,14 @@ export interface ILastMessage {
   text: string;
   sender: IUser;
 }
+
+export interface IMessage {
+  _id: string;
+  conversationId: string;
+  sender: string; // ID do usuário que enviou a mensagem
+  text: string;
+  seen: boolean;
+  img?: string; // Opcional, pode estar vazio
+  createdAt: string;
+  updatedAt: string;
+}

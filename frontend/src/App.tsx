@@ -9,11 +9,35 @@ import { useRecoilValue } from "recoil";
 import userAtom from "./atoms/userAtom";
 import UpdateProfilePage from "./pages/UpdateProfilePage";
 import CreatePost from "./components/CreatePost";
+import { useEffect } from "react";
 // import ChatPage from "./pages/ChatPage";
 
 const App = () => {
   const user = useRecoilValue(userAtom);
   const { pathname } = useLocation();
+
+  const refreshToken = () => {
+    fetch("/api/refresh-token", {
+      method: "POST",
+      credentials: "include", // Ensures the cookie is sent
+    }).then((response) => {
+      if (response.ok) {
+        console.log("Token refreshed");
+      } else {
+        console.log("Failed to refresh token");
+        // Aqui você pode optar por deslogar o usuário se a renovação falhar
+      }
+    });
+  };
+
+  useEffect(() => {
+    // Configura um intervalo para renovar o token a cada 4 minutos
+    const intervalId = setInterval(refreshToken, 4 * 60 * 1000); // 4 minutos
+
+    // Limpa o intervalo quando o componente é desmontado
+    return () => clearInterval(intervalId);
+  }, []);
+
   return (
     <Box position={"relative"} w={"full"}>
       <Container maxW={pathname === "/" ? "900px" : "620px"}>
@@ -21,7 +45,15 @@ const App = () => {
         <Routes>
           <Route
             path="/"
-            element={user ? <HomePage /> : <Navigate to="/auth" />}
+            element={
+              user ? (
+                <>
+                  <HomePage /> <CreatePost />
+                </>
+              ) : (
+                <Navigate to="/auth" />
+              )
+            }
           />
           <Route
             path="/auth"
@@ -37,6 +69,7 @@ const App = () => {
               user ? (
                 <>
                   <UserPage />
+                  <CreatePost />
                 </>
               ) : (
                 <UserPage />
@@ -49,7 +82,6 @@ const App = () => {
             element={user ? <ChatPage /> : <Navigate to={"auth/"} />}
           /> */}
         </Routes>
-        <CreatePost />
       </Container>
     </Box>
   );
